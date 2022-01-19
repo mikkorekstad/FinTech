@@ -52,6 +52,6 @@ class Scraper:
         else:
             buy = False
 
-        return f'Recommendations: \n{buy=} \n {sell=}'
+        return f'Recommendations: \n{buy=}\n{sell=}'
         #return f'{current_price=} \n {open_today=}'
 
