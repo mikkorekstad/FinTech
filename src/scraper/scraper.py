@@ -1,7 +1,9 @@
+import datetime
+
 import pandas as pd
 import yfinance as yf
-import datetime
 from pandas import DataFrame
+
 # import streamlit as st
 # import requests
 # import pandas as pd
@@ -16,10 +18,12 @@ class Scraper:
         current_datetime = datetime.datetime.now()
         start = current_datetime - datetime.timedelta(days=n_days)
         end = current_datetime - datetime.timedelta(days=1)
-        data = self.ticker.history(start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d"))
+        data = self.ticker.history(
+            start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d")
+        )
         data.drop(labels=["Volume", "Dividends", "Stock Splits"], axis=1, inplace=True)
         if data.shape[0] < 15:
-            raise RuntimeError('Not enough data, we need at least 15 days worth!')
+            raise RuntimeError("Not enough data, we need at least 15 days worth!")
         return pd.DataFrame(data)
 
     def get_extreme_value(self, col, method):
@@ -32,15 +36,15 @@ class Scraper:
     def get_current_val(self, col):
         return self.historic_data[col].iloc[-1]
 
-    def recommendation(self):
+    def recommendation(self, api: int = 0):
         current_price = self.get_current_data()
         open_today = self.get_current_val("Open")
         low = self.get_extreme_value("Low", "min")
         high = self.get_extreme_value("High", "max")
 
-        new_low = (current_price < low)
-        new_high = (current_price > high)
-        up_today = (current_price > open_today)
+        new_low = current_price < low
+        new_high = current_price > high
+        up_today = current_price > open_today
 
         if up_today and new_low:
             sell = True
@@ -51,7 +55,13 @@ class Scraper:
             buy = True
         else:
             buy = False
+        if api == 1:
+            return {
+                "recommendation": {"buy": f"{buy}", "sell": f"{sell}"},
+                "new_low": f"{new_low}",
+                "new_high": f"{new_high}",
+                "up_today": f"{up_today}",
+            }
 
-        return f'Recommendations: \n{buy=}\n{sell=}'
-        #return f'{current_price=} \n {open_today=}'
-
+        return f"Recommendations: \n{buy=}\n{sell=}"
+        # return f'{current_price=} \n {open_today=}'
