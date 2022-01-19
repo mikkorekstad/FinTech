@@ -10,15 +10,32 @@ from pandas import DataFrame
 
 
 class Scraper:
-    def __init__(self, ticker="VIX", n_days=30):
-        self.ticker = yf.Ticker(f"^{ticker}")
-        self.historic_data = self.get_historic_data(n_days)
+    """"""
+    def __init__(self, ticker="^VIX", n_days=30):
+        self.ticker = yf.Ticker(f"{ticker}")
+        self.historic_data = self.get_historic_data(ticker=self.ticker, n_days=n_days)
 
-    def get_historic_data(self, n_days=30):
+    def get_json(self, ticker_str=None, n_days=30):
+        """Return json from desired dataframe"""
+        if ticker_str:  # If a ticker is provided, select the provided.
+            ticker = yf.Ticker(f"{ticker_str}")
+        else:  # Else use the one from the instance.
+            ticker = self.ticker
+
+        # Return data as a json
+        data = self.get_historic_data(ticker=ticker, n_days=n_days)
+        return data.to_json()
+
+    @staticmethod
+    def get_historic_data(ticker, n_days=30):
+        """Get historic data from the past n_days, with the current ticker object."""
+        # Time Info
         current_datetime = datetime.datetime.now()
         start = current_datetime - datetime.timedelta(days=n_days)
         end = current_datetime - datetime.timedelta(days=1)
-        data = self.ticker.history(
+
+        # Get Data
+        data = ticker.history(
             start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d")
         )
         data.drop(labels=["Volume", "Dividends", "Stock Splits"], axis=1, inplace=True)
@@ -31,21 +48,26 @@ class Scraper:
         return eval(f"self.historic_data['{col}'].{method}()")
 
     def get_current_data(self):
+        """Get the current price"""
         return self.ticker.info.get("regularMarketPrice")
 
     def get_current_val(self, col):
+        """Get today's value from desired column."""
         return self.historic_data[col].iloc[-1]
 
-    def recommendation(self, api: int = 0):
+    def recommendation(self, api=False):
+        """Calculate a recommendation"""
         current_price = self.get_current_data()
         open_today = self.get_current_val("Open")
         low = self.get_extreme_value("Low", "min")
         high = self.get_extreme_value("High", "max")
 
+        # Get info about stock market situation
         new_low = current_price < low
         new_high = current_price > high
         up_today = current_price > open_today
 
+        # Do a quick analysis of the data
         if up_today and new_low:
             sell = True
         else:
@@ -55,13 +77,16 @@ class Scraper:
             buy = True
         else:
             buy = False
-        if api == 1:
+
+        # Return the results
+        if api:
             return {
                 "recommendation": {"buy": f"{buy}", "sell": f"{sell}"},
                 "new_low": f"{new_low}",
                 "new_high": f"{new_high}",
                 "up_today": f"{up_today}",
             }
-
         return f"Recommendations: \n{buy=}\n{sell=}"
-        # return f'{current_price=} \n {open_today=}'
+
+
+
