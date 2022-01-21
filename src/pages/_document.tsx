@@ -1,7 +1,5 @@
 import NextDocument, { Html, Head, Main, NextScript } from 'next/document'
 import { ColorModeScript } from '@chakra-ui/react'
-import anychart from 'anychart'
-import axios from 'axios'
 
 export default class Document extends NextDocument {
   render() {
