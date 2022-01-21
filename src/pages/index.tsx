@@ -1,24 +1,11 @@
 import {
-  Link as ChakraLink,
   Text,
-  Code,
-  List,
-  ListIcon,
-  ListItem,
-  Input,
 } from '@chakra-ui/react'
-import { CheckCircleIcon, LinkIcon } from '@chakra-ui/icons'
-import { Img } from '@chakra-ui/react'
 
 import { Hero } from '../components/Hero'
 import { Container } from '../components/Container'
-import { Main } from '../components/Main'
 import { DarkModeSwitch } from '../components/DarkModeSwitch'
-import { CTA } from '../components/CTA'
 import { Footer } from '../components/Footer'
-import { GetServerSideProps } from 'next'
-import Html from "next/document";
-import {fetch_data} from '../utils/utils'
 import Image from 'next/image'
 
 
